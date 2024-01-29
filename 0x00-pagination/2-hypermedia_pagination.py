@@ -35,11 +35,11 @@ class Server:
         assert page > 0
         assert page_size > 0
         self.dataset()
-        i = index_range(page, page_size)
-        if i[0] >= len(self.__dataset):
+        j = index_range(page, page_size)
+        if j[0] >= len(self.__dataset):
             return []
         else:
-            return self.__dataset[i[0]:i[1]]
+            return self.__dataset[j[0]:j[1]]
 
     def get_hyper(self, page: int = 1, page_size: int = 10) -> Dict:
         """Retrieves information about a page.

@@ -1,15 +1,29 @@
 #!/usr/bin/env python3
-'''
+"""
 The hypermedia pagination sample
-'''
+"""
 import csv
 import math
-from typing import List, Tuple, Dict
+from typing import Tuple, List, Dict, Any
+
+
+def index_range(page: int, page_size: int) -> Tuple[int, int]:
+    """
+     This returns a tuple of size two containing a start
+     index and an end index corresponding to the
+     range of indexes to return in a list for
+     those particular pagination parameters
+    :param page:
+    :param page_size:
+    :return:
+    """
+    start_index = (page - 1) * page_size
+    end_index = start_index + page_size
+    return start_index, end_index
 
 
 class Server:
-    """This servers class to paginate
-       a database of popular baby names
+    """The server class to paginate a database of popular baby names
     """
     DATA_FILE = "Popular_Baby_Names.csv"
 
@@ -29,41 +43,35 @@ class Server:
 
     def get_page(self, page: int = 1, page_size: int = 10) -> List[List]:
         """
-        This retrieves a page of data
+        This finds the correct indexes to paginate dataset
+        :param page:
+        :param page_size:
+        :return:
         """
-        assert type(page_size) is int and type(page) is int
+        assert type(page) == int
+        assert type(page_size) == int
         assert page > 0
         assert page_size > 0
-        self.dataset()
-        j = index_range(page, page_size)
-        if j[0] >= len(self.__dataset):
+        csv_size = len(self.dataset())
+        start, end = index_range(page, page_size)
+        end = min(end, csv_size)
+        if start >= csv_size:
             return []
-        else:
-            return self.__dataset[j[0]:j[1]]
+        return self.dataset()[start:end]
 
-    def get_hyper(self, page: int = 1, page_size: int = 10) -> Dict:
-        """Retrieves information about a page.
+    def get_hyper(self, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
         """
-        data = self.get_page(page, page_size)
-        start_index, end_index = index_range(page, page_size)
-        total = math.ceil(len(self.__dataset) / page_size)
-        output = {
-            'page_size': len(data),
-            'page': page,
-            'data': data,
-            'next_page': page + 1 if end_index < len(self.__dataset) else None,
-            'prev_page': page - 1 if start_index > 0 else None,
-            'total': total,
+        This returns dataset as a dictionary
+        :param page:
+        :param page_size:
+        :return:
+        """
+        total_pages = math.ceil(len(self.dataset()) / page_size)
+        return {
+            "page_size": page_size,
+            "page": page,
+            "data": self.get_page(page, page_size),
+            "next_page": page + 1 if page + 1 <= total_pages else None,
+            "prev_page": page - 1 if page > 1 else None,
+            "total_pages": total_pages
         }
-        return output
-
-
-def index_range(page: int, page_size: int) -> Tuple[int, int]:
-    """
-    This uses index_range to find correct
-    indexes to paginate the dataset correctly
-    """
-    start_index = page * page_size - page_size
-    end_index = start_index + page_size
-
-    return (start_index, end_index)

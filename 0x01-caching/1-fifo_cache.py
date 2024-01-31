@@ -1,37 +1,48 @@
 #!/usr/bin/env python3
-
-"""The FIFO caching
+"""
+The FIFO Caching
 """
 
-
-from collections import OrderedDict
-from base_caching import BaseCaching
+BaseCaching = __import__('base_caching').BaseCaching
 
 
 class FIFOCache(BaseCaching):
-    """The class `FIFOCache` that inherits from `BaseCaching`
-       and is a caching system
+    """
+    The class FIFOCache that inherits from
+    BaseCaching and is a caching system
     """
 
     def __init__(self):
+        """
+        The Init method
+        """
         super().__init__()
-        self.cache_data = OrderedDict()
+        self.key_indexes = []
 
     def put(self, key, item):
-        """the `item` value for the key `key' is
-           assign to the dictionary `self.cache_data` 
         """
+        The item value for the key 'key' is
+        assign to the dictionary self.cache_data
 
-        if key is None or item is None:
-            return
+        """
+        if key and item:
+            if key in self.cache_data:
+                self.cache_data[key] = item
+                return
 
-        if len(self.cache_data) > BaseCaching.MAX_ITEMS:
-            first_key, _ = self.cache_data.popitem(last=False)
-            print(f"DISCARD: {first_key}")
+            if len(self.cache_data) >= BaseCaching.MAX_ITEMS:
+                item_discarded = self.key_indexes.pop(0)
+                del self.cache_data[item_discarded]
+                print("DISCARD:", item_discarded)
 
-        self.cache_data[key] = item
+            self.cache_data[key] = item
+            self.key_indexes.append(key)
 
     def get(self, key):
-        """ This return the value in `self.cache_data` linked to `key`
         """
-        return self.cache_data.get(key, None)
+        This returns the value in
+        self.cache_data linked to key
+        """
+        if key in self.cache_data:
+            return self.cache_data[key]
+        return None
